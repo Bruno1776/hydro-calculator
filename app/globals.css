@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 186 70% 35%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 186 70% 35%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 186 70% 35%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Grupo Novaes Brand Colors */
+    --novaes-teal: 186 70% 35%;
+    --novaes-teal-light: 186 70% 45%;
+    --novaes-teal-dark: 186 70% 25%;
+    --novaes-gray: 220 9% 46%;
+    --novaes-gray-light: 220 9% 56%;
+    --novaes-green: 142 76% 36%;
+    --novaes-blue: 200 98% 39%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 186 70% 45%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 186 70% 45%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 186 70% 45%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Grupo Novaes Brand Utilities */
+.bg-novaes-teal {
+  background-color: hsl(var(--novaes-teal));
+}
+
+.bg-novaes-teal-light {
+  background-color: hsl(var(--novaes-teal-light));
+}
+
+.bg-novaes-teal-dark {
+  background-color: hsl(var(--novaes-teal-dark));
+}
+
+.text-novaes-teal {
+  color: hsl(var(--novaes-teal));
+}
+
+.text-novaes-teal-light {
+  color: hsl(var(--novaes-teal-light));
+}
+
+.text-novaes-gray {
+  color: hsl(var(--novaes-gray));
+}
+
+.border-novaes-teal {
+  border-color: hsl(var(--novaes-teal));
+}
+
+/* Custom gradient backgrounds */
+.bg-novaes-gradient {
+  background: linear-gradient(135deg, hsl(var(--novaes-teal)) 0%, hsl(var(--novaes-teal-light)) 100%);
+}
+
+.bg-novaes-gradient-subtle {
+  background: linear-gradient(135deg, hsl(var(--novaes-teal) / 0.05) 0%, hsl(var(--novaes-teal-light) / 0.1) 100%);
+}
+
+/* Custom styles for math expressions */
+.math-expression {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.math-expression .fraction {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  position: relative;
+}
+
+.math-expression .numerator {
+  display: block;
+  border-bottom: 1px solid currentColor;
+  padding: 0 4px 2px;
+  font-size: 0.9em;
+}
+
+.math-expression .denominator {
+  display: block;
+  padding: 2px 4px 0;
+  font-size: 0.9em;
+}
+
+.math-expression .sqrt {
+  position: relative;
+  display: inline-block;
+}
+
+.math-expression .sqrt-content {
+  border-top: 1px solid currentColor;
+  padding-left: 2px;
+}
+
+.math-expression .math-text {
+  font-family: inherit;
+  font-style: normal;
+}
+
+.math-expression sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+.math-expression sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+
+/* Sustainability themed animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-teal {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.pulse-teal {
+  animation: pulse-teal 2s ease-in-out infinite;
+}
