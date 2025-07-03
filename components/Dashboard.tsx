@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Platform, SafeAreaView } from 'react-native';
 import { CalculationType, CalculationHistory } from '@/types/calculation';
 import { LayoutDashboard, BookOpen, BarChart3, Trash2, CheckCircle, ChevronRight } from 'lucide-react-native';
 
@@ -7,9 +7,10 @@ interface DashboardProps {
   calculations: CalculationType[];
   onCalculationSelect: (calculation: CalculationType) => void;
   onLearningSelect: (calculation: CalculationType) => void;
-  calculationHistory: CalculationHistory[];
-  onClearHistory: () => void;
-  completedLearningModules: Set<string>;
+  calculationHistory: CalculationHistory[]; // Pode ser usado para mostrar um resumo ou contagem
+  // onClearHistory: () => void; // Removido, será tratado na tela de Histórico
+  onViewHistory: () => void; // Nova prop para navegar para a tela de histórico
+  // completedLearningModules: Set<string>; // Removido
 }
 
 const AppColors = {
@@ -30,8 +31,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   onCalculationSelect,
   onLearningSelect,
   calculationHistory,
-  onClearHistory,
-  completedLearningModules,
+  // onClearHistory, // Removido
+  onViewHistory,
+  // completedLearningModules, // Removido
 }) => {
   const renderCalculationItem = ({ item }: { item: CalculationType }) => (
     <TouchableOpacity style={styles.card} onPress={() => onCalculationSelect(item)}>
@@ -55,30 +57,12 @@ const Dashboard: React.FC<DashboardProps> = ({
           <BookOpen color={AppColors.primary} size={18} />
           <Text style={[styles.actionText, styles.learnButtonText]}>Aprender</Text>
         </TouchableOpacity>
-        {completedLearningModules.has(item.id) && (
-          <View style={styles.completedBadge}>
-            <CheckCircle color={AppColors.accentGreen} size={16} />
-            <Text style={styles.completedText}>Concluído</Text>
-          </View>
-        )}
+        {/* Badge de concluído removido */}
       </View>
     </TouchableOpacity>
   );
 
-  const renderHistoryItem = ({ item }: { item: CalculationHistory }) => (
-    <View style={styles.historyItem}>
-      <Text style={styles.historyTitle}>{item.type}</Text>
-      <Text style={styles.historyDate}>{new Date(item.timestamp).toLocaleDateString()} - {new Date(item.timestamp).toLocaleTimeString()}</Text>
-      <View style={styles.historyDetails}>
-        <Text style={styles.historyDetailLabel}>Entradas: </Text>
-        <Text style={styles.historyDetailValue}>{JSON.stringify(item.inputs)}</Text>
-      </View>
-      <View style={styles.historyDetails}>
-        <Text style={styles.historyDetailLabel}>Resultado: </Text>
-        <Text style={styles.historyDetailValue}>{JSON.stringify(item.result)}</Text>
-      </View>
-    </View>
-  );
+  // renderHistoryItem removido daqui
 
   const groupedCalculations = calculations.reduce((acc, calc) => {
     const category = calc.category;
@@ -90,49 +74,53 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, {} as Record<string, CalculationType[]>);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-      <View style={styles.header}>
-        <LayoutDashboard color={AppColors.primary} size={28} />
-        <Text style={styles.headerTitle}>Calculadora Hidráulica</Text>
-      </View>
-
-      {Object.entries(groupedCalculations).map(([category, calcs]) => (
-        <View key={category} style={styles.categorySection}>
-          <Text style={styles.categoryTitle}>{category}</Text>
-          {/* Usando map em vez de FlatList para seções menores dentro de um ScrollView */}
-          {calcs.map(calc => renderCalculationItem({ item: calc }))}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
+        <View style={styles.header}>
+          <LayoutDashboard color={AppColors.primary} size={28} />
+          <Text style={styles.headerTitle}>Calculadora Hidráulica</Text>
         </View>
-      ))}
 
-      <View style={styles.historySection}>
-        <View style={styles.historyHeader}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <BarChart3 color={AppColors.text} size={24} />
-            <Text style={styles.sectionTitle}>Histórico de Cálculos</Text>
+        {Object.entries(groupedCalculations).map(([category, calcs]) => (
+          <View key={category} style={styles.categorySection}>
+            <Text style={styles.categoryTitle}>{category}</Text>
+            {/* Usando map em vez de FlatList para seções menores dentro de um ScrollView */}
+            {calcs.map(calc => renderCalculationItem({ item: calc }))}
           </View>
-          {calculationHistory.length > 0 && (
-            <TouchableOpacity onPress={onClearHistory} style={styles.clearButton}>
-              <Trash2 color={AppColors.accentRed} size={20} />
-              <Text style={styles.clearButtonText}>Limpar</Text>
+        ))}
+
+        <View style={styles.historySection}>
+          <View style={styles.historyHeader}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <BarChart3 color={AppColors.text} size={24} />
+              <Text style={styles.sectionTitle}>Histórico de Cálculos</Text>
+            </View>
+          {/* Botão Limpar removido daqui */}
+          </View>
+          {calculationHistory.length > 0 ? (
+          <>
+            <Text style={styles.historySummaryText}>
+              {`Você tem ${calculationHistory.length} cálculo(s) no histórico.`}
+            </Text>
+            <TouchableOpacity style={styles.viewHistoryButton} onPress={onViewHistory}>
+              <Text style={styles.viewHistoryButtonText}>Ver Histórico Completo</Text>
+              <ChevronRight color={AppColors.primary} size={20} />
             </TouchableOpacity>
+          </>
+          ) : (
+            <Text style={styles.emptyHistoryText}>Nenhum cálculo realizado ainda.</Text>
           )}
         </View>
-        {calculationHistory.length > 0 ? (
-          <FlatList
-            data={calculationHistory}
-            renderItem={renderHistoryItem}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false} // A rolagem principal é do ScrollView
-          />
-        ) : (
-          <Text style={styles.emptyHistoryText}>Nenhum cálculo realizado ainda.</Text>
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: AppColors.cardBackground, // Cor de fundo para a área segura, pode ser a mesma do header ou do background geral
+  },
   container: {
     flex: 1,
     backgroundColor: AppColors.background,
@@ -238,20 +226,7 @@ const styles = StyleSheet.create({
   learnButtonText: {
     color: AppColors.primary,
   },
-  completedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E5F9ED', // Verde mais suave
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  completedText: {
-    marginLeft: 5,
-    color: AppColors.accentGreen,
-    fontSize: 12,
-    fontWeight: '500',
-  },
+  // Estilos completedBadge e completedText removidos
   historySection: {
     marginTop: 16,
     marginHorizontal: 16,
@@ -285,47 +260,28 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: AppColors.text,
   },
-  clearButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  clearButtonText: {
-    marginLeft: 5,
-    color: AppColors.accentRed,
+  // clearButton e clearButtonText removidos
+  // historyItem, historyTitle, historyDate, historyDetails, historyDetailLabel, historyDetailValue removidos
+  historySummaryText: {
     fontSize: 14,
-    fontWeight: '500',
-  },
-  historyItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: AppColors.borderColor,
-  },
-  historyTitle: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: AppColors.text,
-    marginBottom: 2,
-  },
-  historyDate: {
-    fontSize: 12,
     color: AppColors.textSecondary,
-    marginBottom: 4,
+    textAlign: 'center',
+    marginBottom: 8,
   },
-  historyDetails: {
+  viewHistoryButton: {
     flexDirection: 'row',
-    marginTop: 2,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: AppColors.buttonBlueBackground, // Reutilizando cor de fundo
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
   },
-  historyDetailLabel: {
-    fontSize: 13,
-    color: AppColors.textSecondary,
+  viewHistoryButtonText: {
+    fontSize: 16,
+    color: AppColors.primary, // Reutilizando cor do texto do botão "Aprender"
     fontWeight: '500',
-  },
-  historyDetailValue: {
-    fontSize: 13,
-    color: AppColors.text,
-    flexShrink: 1, // Para quebrar linha se o JSON for longo
   },
   emptyHistoryText: {
     textAlign: 'center',

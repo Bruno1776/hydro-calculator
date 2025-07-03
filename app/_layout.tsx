@@ -80,6 +80,13 @@ export default function RootLayout() {
             headerShown: true,
           }}
         />
+        <Stack.Screen
+          name="history" // Nome do arquivo app/history.tsx
+          options={{
+            title: 'Histórico de Cálculos', // Título padrão, pode ser sobrescrito na tela
+            headerShown: true,
+          }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

@@ -4,11 +4,11 @@ import { CalculationType } from '@/types/calculation';
 import { CheckCircle } from 'lucide-react-native';
 // Removido ArrowLeft e CheckSquare, pois a navegação de voltar é pelo header do router
 // e o toggle de modo será feito pelo headerRight na tela.
+import MathJax from 'react-native-mathjax'; // Adicionado para LaTeX
 
 interface LearningViewProps {
   calculation: CalculationType;
-  onMarkModuleComplete: (calculationId: string) => void;
-  isModuleCompleted: boolean;
+  // onMarkModuleComplete e isModuleCompleted removidos
 }
 
 const AppColors = {
@@ -114,8 +114,7 @@ const getLearningContent = (calculationId: string): { title: string; paragraphs:
 
 const LearningViewComponent: React.FC<LearningViewProps> = ({
   calculation,
-  onMarkModuleComplete,
-  isModuleCompleted,
+  // onMarkModuleComplete e isModuleCompleted removidos das props
 }) => {
   const content = getLearningContent(calculation.id);
 
@@ -131,29 +130,30 @@ const LearningViewComponent: React.FC<LearningViewProps> = ({
         {content.formulas && content.formulas.length > 0 && (
           <View style={styles.formulasContainer}>
             <Text style={styles.formulaTitle}>Fórmulas Relevantes:</Text>
-            {content.formulas.map((formula, index) => (
-              <Text key={`f-${index}`} style={styles.formulaItem}>
-                {formula}
-              </Text>
-            ))}
+            {content.formulas.map((formulaString, index) => {
+              // Heurística simples para detectar LaTeX. Pode precisar de ajuste.
+              const isLatex = /[\\{}^_]/.test(formulaString) || formulaString.includes('²') || formulaString.includes('³') || formulaString.includes('⁴');
+              if (isLatex || formulaString.startsWith('h_L') || formulaString.startsWith('Q =') || formulaString.startsWith('h_f') || formulaString.startsWith('P_h') || formulaString.startsWith('P_eixo') || formulaString.startsWith('V =') || formulaString.startsWith('Re =') || formulaString.startsWith('A =') || formulaString.startsWith('ΔP')) {
+                return (
+                  <MathJax
+                    key={`f-${index}`}
+                    style={styles.formulaItem}
+                    html={`<p style="font-size: 15px; line-height: 22px; color: ${AppColors.textSecondary}; margin-bottom: 4px; font-family: ${Platform.OS === 'ios' ? 'Menlo' : 'monospace'};">$$${formulaString}$$</p>`}
+                  />
+                );
+              }
+              // Se não parecer LaTeX, renderiza como texto normal, mas ainda com estilo de item de fórmula
+              return (
+                <Text key={`f-${index}`} style={[styles.formulaItem, styles.formulaDescription]}>
+                  {formulaString}
+                </Text>
+              );
+            })}
           </View>
         )}
       </View>
 
-      {!isModuleCompleted ? (
-        <TouchableOpacity
-            style={styles.completeButton}
-            onPress={() => onMarkModuleComplete(calculation.id)}
-        >
-            <CheckCircle size={20} color={AppColors.buttonText} />
-            <Text style={styles.completeButtonText}>Marcar como Concluído</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.completedMessageContainer}>
-          <CheckCircle color={AppColors.accentGreen} size={24} />
-          <Text style={styles.completedMessageText}>Módulo Concluído!</Text>
-        </View>
-      )}
+      {/* Seção de "Marcar como Concluído" e "Módulo Concluído" removida */}
     </ScrollView>
   );
 };
@@ -208,6 +208,14 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     marginBottom: 4,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    // Ajustado para ser um estilo base para MathJax e Text
+  },
+  formulaDescription: { // Estilo para texto não-LaTeX dentro da lista de fórmulas
+    fontSize: 15, // Consistente com o tamanho da fonte no MathJax
+    lineHeight: 22,
+    color: AppColors.textSecondary,
+    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   completeButton: {
     backgroundColor: AppColors.accentGreen,
@@ -223,22 +231,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  completedMessageContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    backgroundColor: '#E5F9ED',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: AppColors.accentGreen,
-  },
-  completedMessageText: {
-    fontSize: 17,
-    color: AppColors.accentGreen,
-    marginLeft: 10,
-    fontWeight: '600',
-  },
+  // Estilos de completedMessageContainer e completedMessageText removidos
 });
 
 export default LearningViewComponent; // Renomeado para evitar conflito

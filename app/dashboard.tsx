@@ -5,14 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useFocusEffect } from 'expo-router';
 
 const HISTORY_KEY = "hydraulic-calc-history";
-const MODULES_KEY = "hydraulic-learning-modules";
+// const MODULES_KEY = "hydraulic-learning-modules"; // Removido
 const STREAK_KEY = "hydraulic-streak";
 const LAST_CALC_DATE_KEY = "hydraulic-last-calculation";
 
 export default function DashboardScreen() {
   const router = useRouter();
   const [calculationHistory, setCalculationHistory] = useState<CalculationHistory[]>([]);
-  const [completedLearningModules, setCompletedLearningModules] = useState<Set<string>>(new Set());
+  // const [completedLearningModules, setCompletedLearningModules] = useState<Set<string>>(new Set()); // Removido
   // Streak e lastCalculationDate são gerenciados principalmente na tela de cálculo,
   // mas podem ser lidos aqui se o Dashboard precisar exibi-los.
 
@@ -25,17 +25,18 @@ export default function DashboardScreen() {
         setCalculationHistory([]);
       }
 
-      const savedModules = await AsyncStorage.getItem(MODULES_KEY);
-      if (savedModules) {
-        setCompletedLearningModules(new Set(JSON.parse(savedModules)));
-      } else {
-        setCompletedLearningModules(new Set());
-      }
+      // Lógica de carregamento de módulos concluídos removida
+      // const savedModules = await AsyncStorage.getItem(MODULES_KEY);
+      // if (savedModules) {
+      //   setCompletedLearningModules(new Set(JSON.parse(savedModules)));
+      // } else {
+      //   setCompletedLearningModules(new Set());
+      // }
     } catch (e) {
       console.error("Failed to load data in Dashboard:", e);
       // Definir estados para arrays vazios em caso de erro para evitar quebrar a UI
       setCalculationHistory([]);
-      setCompletedLearningModules(new Set());
+      // setCompletedLearningModules(new Set()); // Removido
     }
   }, []);
 
@@ -75,17 +76,10 @@ export default function DashboardScreen() {
     });
   };
 
-  const clearHistory = async () => {
-    try {
-      await AsyncStorage.removeItem(HISTORY_KEY);
-      setCalculationHistory([]);
-      // Opcionalmente, resetar streak e last calculation date também
-      await AsyncStorage.removeItem(STREAK_KEY);
-      await AsyncStorage.removeItem(LAST_CALC_DATE_KEY);
-      console.log("Histórico e dados de streak limpos.");
-    } catch (e) {
-      console.error("Failed to clear history:", e);
-    }
+  // clearHistory removido daqui
+
+  const handleViewHistory = () => {
+    router.push('/history');
   };
 
   return (
@@ -94,8 +88,8 @@ export default function DashboardScreen() {
       onCalculationSelect={handleCalculationSelect}
       onLearningSelect={handleLearningSelect}
       calculationHistory={calculationHistory}
-      onClearHistory={clearHistory}
-      completedLearningModules={completedLearningModules}
+      onViewHistory={handleViewHistory} // Nova prop
+      // completedLearningModules prop removida
     />
   );
 }

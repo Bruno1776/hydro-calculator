@@ -6,13 +6,15 @@ import { CalculationType, calculationsData } from '@/types/calculation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CheckSquare } from 'lucide-react-native';
 
-const MODULES_KEY = "hydraulic-learning-modules";
+// const MODULES_KEY = "hydraulic-learning-modules"; // Removido
 
 const AppColors = { // Consistência de cores
   primary: '#007AFF',
   headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
-  calcButtonBackground: '#EBF5FF',
-  calcButtonText: '#007AFF',
+  // calcButtonBackground: '#EBF5FF', // Antigo
+  // calcButtonText: '#007AFF', // Antigo
+  headerButtonIconColor: '#28a745', // Verde para o ícone (Bootstrap success green)
+  headerButtonBackground: Platform.OS === 'android' ? '#E9F5EC' : 'transparent', // Fundo verde claro para Android
 };
 
 export default function LearningScreen() {
@@ -21,42 +23,32 @@ export default function LearningScreen() {
   const { id, title, description, icon, category } = params;
 
   const [selectedCalculation, setSelectedCalculation] = useState<CalculationType | null>(null);
-  const [isModuleCompleted, setIsModuleCompleted] = useState(false);
-  const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
+  // Removido isModuleCompleted e completedModules
 
-  const loadData = useCallback(async () => {
-    if (id) {
-      const foundCalc = calculationsData.find(calc => calc.id === id);
-      if (foundCalc) {
-        setSelectedCalculation(foundCalc);
-      } else if (title && description && icon && category) {
-         setSelectedCalculation({ id, title, description, icon, category });
-      } else {
-        Alert.alert("Erro", "Módulo de aprendizado não encontrado.", [{ text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace('/dashboard') }]);
-        return;
-      }
-    }
-
-    try {
-      const savedModules = await AsyncStorage.getItem(MODULES_KEY);
-      if (savedModules) {
-        const modulesSet = new Set<string>(JSON.parse(savedModules));
-        setCompletedModules(modulesSet);
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
         if (id) {
-          setIsModuleCompleted(modulesSet.has(id));
+          const foundCalc = calculationsData.find(calc => calc.id === id);
+          if (foundCalc) {
+            setSelectedCalculation(foundCalc);
+          } else if (title && description && icon && category) {
+            setSelectedCalculation({ id, title, description, icon, category });
+          } else {
+            Alert.alert(
+              "Erro",
+              "Módulo de aprendizado não encontrado.",
+              [{ text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace('/dashboard') }]
+            );
+            return;
+          }
         }
-      } else {
-        setCompletedModules(new Set());
-        setIsModuleCompleted(false); // Garante que não seja true se não houver dados salvos
-      }
-    } catch (e) {
-      console.error("Failed to load completed modules:", e);
-      setCompletedModules(new Set());
-      setIsModuleCompleted(false);
-    }
-  }, [id, title, description, icon, category, router]);
+        // Lógica de carregamento de módulos concluídos removida
+      };
 
-  useFocusEffect(loadData); // Recarrega os dados quando a tela ganha foco
+      loadData();
+    }, [id, title, description, icon, category, router])
+  ); // Recarrega os dados quando a tela ganha foco
 
   const navigateToCalculationMode = () => {
     if (selectedCalculation) {
@@ -67,24 +59,7 @@ export default function LearningScreen() {
     }
   };
 
-  const markModuleComplete = async (calculationId: string) => {
-    const newCompletedModules = new Set(completedModules);
-    newCompletedModules.add(calculationId);
-    setCompletedModules(newCompletedModules); // Atualiza estado local primeiro para UI responsiva
-    setIsModuleCompleted(true);
-    try {
-      await AsyncStorage.setItem(MODULES_KEY, JSON.stringify(Array.from(newCompletedModules)));
-      console.log("Módulo de aprendizado salvo:", calculationId);
-    } catch (e) {
-      console.error("Falha ao salvar módulos completados:", e);
-      Alert.alert("Erro", "Não foi possível salvar o progresso do módulo.");
-      // Reverter o estado se o salvamento falhar (opcional, mas bom para consistência)
-      const revertedModules = new Set(completedModules);
-      revertedModules.delete(calculationId);
-      setCompletedModules(revertedModules);
-      setIsModuleCompleted(false);
-    }
-  };
+  // Função markModuleComplete removida
 
   if (!selectedCalculation) {
     return (
@@ -101,16 +76,15 @@ export default function LearningScreen() {
         options={{
           title: selectedCalculation.title ? `Aprender: ${selectedCalculation.title}` : "Módulo de Aprendizado",
           headerRight: () => (
-            <TouchableOpacity onPress={navigateToCalculationMode} style={styles.headerButton}>
-              <CheckSquare color={AppColors.headerText} size={24} />
+            <TouchableOpacity onPress={navigateToCalculationMode} style={[styles.headerButton, { backgroundColor: AppColors.headerButtonBackground }]}>
+              <CheckSquare color={AppColors.headerButtonIconColor} size={24} />
             </TouchableOpacity>
           ),
         }}
       />
       <LearningViewComponent
         calculation={selectedCalculation}
-        onMarkModuleComplete={markModuleComplete}
-        isModuleCompleted={isModuleCompleted}
+        // Props onMarkModuleComplete e isModuleCompleted removidas
       />
     </>
   );
@@ -127,7 +101,7 @@ const styles = StyleSheet.create({
   headerButton: {
     marginRight: Platform.OS === 'ios' ? 10 : 15,
     padding: 5,
-    backgroundColor: Platform.OS === 'android' ? AppColors.calcButtonBackground : 'transparent',
+    // backgroundColor removido daqui, pois será aplicado inline via AppColors.headerButtonBackground
     borderRadius: Platform.OS === 'android' ? 20 : 0,
   },
 });
