@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Droplet } from 'lucide-react-native'; // Ícone de gota
+import { Droplet } from 'lucide-react-native';
+import { styles } from './SplashScreen.styles'; // AppColors não é mais exportado daqui
+import { AppColors } from '@/constants/colors'; // Importando de constants
 
-const SplashScreen = () => {
+const SplashScreenComponent = () => {
   const router = useRouter();
 
   useEffect(() => {
@@ -16,37 +18,20 @@ const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Droplet size={Dimensions.get('window').width * 0.2} color="#FFFFFF" />
+      <Droplet
+        size={Dimensions.get('window').width * 0.2}
+        color={AppColors.white}
+        style={styles.icon}
+      />
       <Text style={styles.title}>Hydro Calculator</Text>
-      <ActivityIndicator size="large" color="#FFFFFF" style={styles.activityIndicator} />
+      <ActivityIndicator
+        size="large"
+        color={AppColors.white}
+        style={styles.activityIndicator}
+      />
       <Text style={styles.subtitle}>Calculando o futuro da água...</Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#007AFF', // Azul primário (sugestão, pode ser ajustado)
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginTop: 20, // Espaçamento após o ícone
-    marginBottom: 30, // Espaçamento antes do ActivityIndicator
-    textAlign: 'center',
-  },
-  activityIndicator: {
-    marginBottom: 15,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#EFEFEF', // Um cinza claro para contraste suave
-    fontStyle: 'italic',
-  },
-});
-
-export default SplashScreen;
+export default SplashScreenComponent;

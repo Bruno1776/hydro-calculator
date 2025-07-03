@@ -1,37 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import CalculationViewComponent from '@/components/CalculationView'; // Renomeado no arquivo do componente
+import CalculationViewComponent from '@/components/CalculationView';
 import { CalculationType, CalculationHistory, calculationsData } from '@/types/calculation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveHistoryEntry, updateStreakAndLastCalcDate } from '@/services/asyncStorage'; // Funções de AsyncStorage atualizadas
 import { BookOpen } from 'lucide-react-native';
 
-const HISTORY_KEY = "hydraulic-calc-history";
-const STREAK_KEY = "hydraulic-streak";
-const LAST_CALC_DATE_KEY = "hydraulic-last-calculation";
-
-const AppColors = { // Consistência de cores
+// Cores podem ser movidas para um arquivo de tema global
+const AppColors = {
   primary: '#007AFF',
   headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
-  learnButtonBackground: '#FFF3E0',
-  learnButtonText: '#FF9500',
+  learnButtonBackground: Platform.OS === 'android' ? '#FFF3E0' : 'transparent', // Condicional para Android
+  // learnButtonText: '#FF9500', // Não usado diretamente aqui
 };
 
 export default function CalculationScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; title?: string; description?: string; icon?: string; category?: string }>();
+  // Tipagem mais robusta para os parâmetros da rota
+  const params = useLocalSearchParams<Partial<CalculationType> & { id: string }>();
   const { id, title, description, icon, category } = params;
 
   const [selectedCalculation, setSelectedCalculation] = useState<CalculationType | null>(null);
-
-  const navigateToLearningMode = () => {
-    if (selectedCalculation) {
-      router.replace({
-        pathname: `/learning/${selectedCalculation.id}`,
-        params: { ...selectedCalculation }
-      });
-    }
-  };
 
   useEffect(() => {
     if (id) {
@@ -39,52 +28,36 @@ export default function CalculationScreen() {
       if (foundCalc) {
         setSelectedCalculation(foundCalc);
       } else if (title && description && icon && category) {
-         setSelectedCalculation({ id, title, description, icon, category });
+        // Se não encontrar nos dados estáticos, mas todos os params estiverem presentes, monta o objeto
+        setSelectedCalculation({ id, title, description, icon, category });
       } else {
-        Alert.alert("Erro", "Cálculo não encontrado.", [{ text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace('/dashboard') }]);
+        Alert.alert(
+          "Erro",
+          "Cálculo não encontrado ou dados incompletos.",
+          [{ text: "OK", onPress: () => router.canGoBack() ? router.back() : router.replace('/dashboard') }]
+        );
       }
     }
   }, [id, title, description, icon, category, router]);
 
+  const navigateToLearningMode = () => {
+    if (selectedCalculation) {
+      router.replace({
+        pathname: `/learning/${selectedCalculation.id}`,
+        params: { ...selectedCalculation } // Passa todos os dados do cálculo
+      });
+    }
+  };
 
-  const addToHistory = async (calculationEntry: CalculationHistory) => {
+  const handleAddToHistory = async (calculationEntry: CalculationHistory) => {
     try {
-      const savedHistory = await AsyncStorage.getItem(HISTORY_KEY);
-      let newHistory: CalculationHistory[] = savedHistory ? JSON.parse(savedHistory) : [];
-      newHistory = [calculationEntry, ...newHistory.slice(0, 49)];
-      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-      console.log("Histórico salvo:", newHistory);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const lastCalcDateStr = await AsyncStorage.getItem(LAST_CALC_DATE_KEY);
-      const currentStreakStr = await AsyncStorage.getItem(STREAK_KEY);
-      let currentStreak = currentStreakStr ? parseInt(currentStreakStr, 10) : 0;
-
-      if (lastCalcDateStr) {
-        const lastCalcDate = new Date(lastCalcDateStr);
-        lastCalcDate.setHours(0,0,0,0);
-
-        const diffTime = today.getTime() - lastCalcDate.getTime();
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 1) {
-          currentStreak += 1;
-        } else if (diffDays > 1) {
-          currentStreak = 1;
-        }
-      } else {
-        currentStreak = 1;
-      }
-
-      await AsyncStorage.setItem(STREAK_KEY, currentStreak.toString());
-      await AsyncStorage.setItem(LAST_CALC_DATE_KEY, today.toISOString());
-      console.log("Streak atualizado:", currentStreak, "Última data:", today.toISOString());
-
+      await saveHistoryEntry(calculationEntry);
+      await updateStreakAndLastCalcDate(); // Atualiza o streak e a data do último cálculo
+      // Opcional: feedback ao usuário que foi salvo, mas console.log é bom para debug
+      console.log("Histórico e streak salvos com sucesso.");
     } catch (e) {
-      console.error("Falha ao salvar histórico ou streak:", e);
-      Alert.alert("Erro", "Não foi possível salvar o histórico do cálculo.");
+      console.error("Falha ao salvar histórico ou streak na tela de cálculo:", e);
+      Alert.alert("Erro", "Não foi possível salvar o histórico ou atualizar o progresso.");
     }
   };
 
@@ -111,24 +84,24 @@ export default function CalculationScreen() {
       />
       <CalculationViewComponent
         calculation={selectedCalculation}
-        onAddToHistory={addToHistory}
+        onAddToHistory={handleAddToHistory} // Nome da prop atualizado para refletir a ação
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: { // Renomeado de container para evitar conflito se CalculationViewComponent usar 'container'
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0f0f0', // Um cinza claro para o fundo do loading
   },
   headerButton: {
     marginRight: Platform.OS === 'ios' ? 10 : 15,
     padding: 5,
-    backgroundColor: Platform.OS === 'android' ? AppColors.learnButtonBackground : 'transparent', // Fundo apenas no Android para destacar
-    borderRadius: Platform.OS === 'android' ? 20 : 0,
+    backgroundColor: AppColors.learnButtonBackground,
+    borderRadius: Platform.OS === 'android' ? 20 : 0, // Borda arredondada apenas no Android
   },
 });
