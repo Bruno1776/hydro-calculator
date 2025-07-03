@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { CalculationType } from '@/types/calculation';
 import { BookOpen, ChevronRight } from 'lucide-react-native';
 import { calculationCardStyles as styles } from './CalculationCard.styles'; // Importando os estilos corretos
-import { AppColors } from '../../Dashboard.styles'; // Importando AppColors
+import { AppColors } from '@/constants/colors';
 
 interface CalculationCardProps {
   item: CalculationType;
@@ -11,7 +11,7 @@ interface CalculationCardProps {
   onLearn: (calculation: CalculationType) => void;
 }
 
-const CalculationCard: React.FC<CalculationCardProps> = ({ item, onSelect, onLearn }) => {
+const CalculationCard: React.FC<CalculationCardProps> = ({ item , onSelect, onLearn }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onSelect(item)}>
       <View style={styles.cardContent}>
@@ -25,14 +25,14 @@ const CalculationCard: React.FC<CalculationCardProps> = ({ item, onSelect, onLea
       </View>
       <View style={styles.actionsContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.learnButton]}
+          style={[styles.actionButton]}
           onPress={(e) => {
             e.stopPropagation();
             onLearn(item);
           }}
         >
           <BookOpen color={AppColors.primary} size={18} />
-          <Text style={[styles.actionText, styles.learnButtonText]}>Aprender</Text>
+          <Text style={[styles.actionText]}>Aprender</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>

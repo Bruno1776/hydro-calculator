@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, Dimensions } from 'react-native'; // Importar Dimensions
 import { CalculationType, CalculationHistory } from '@/types/calculation';
 import CalculationForm from './screens/calculation/CalculationForm';
 import CalculationResult from './screens/calculation/CalculationResult';
-import { CalculationField as CalculationFormField, UnitOption } from './screens/calculation/CalculationInput'; // Renomeando para evitar conflito
+import { CalculationField as CalculationFormField, UnitOption } from './screens/calculation/CalculationInput';
 import { styles } from './CalculationView.styles';
+import { AppColors } from '@/constants/colors'; // Certificar-me que AppColors está importado para o footer
 
 // As definições de unidades, fatores de conversão e lógica de cálculo permanecem aqui por enquanto
 // Poderiam ser movidas para `services/calculationLogic.ts` ou similar em uma etapa posterior.
@@ -141,6 +142,7 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
   calculation,
   onAddToHistory,
 }) => {
+  console.log(JSON.stringify(calculation))
   const fields = getCalculationFields(calculation.id);
   const [inputValues, setInputValues] = useState<Record<string, string>>(
     fields.reduce((acc, field) => ({ ...acc, [field.name]: '' }), {})
@@ -233,32 +235,44 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
     return baseValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
   };
 
+  const screenHeight = Dimensions.get('window').height;
+  const footerHeight = screenHeight * 0.18; // 18% da altura total da tela
+
   return (
-    <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-    >
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-        <Text style={styles.description}>{calculation.description}</Text>
+    <View style={styles.fullScreenContainer}> {/* Novo container para toda a tela */}
+      <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoidingView} // Estilo ajustado para flex: 1
+      >
+        <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContentContainer}>
+          <Text style={styles.description}>{calculation.description}</Text>
 
-        <CalculationForm
-          fields={fields}
-          inputValues={inputValues}
-          selectedInputUnits={selectedInputUnits}
-          onInputChange={handleInputChange}
-          onUnitChange={handleUnitChange}
-          onCalculate={handleCalculate}
-        />
+          <CalculationForm
+            fields={fields}
+            inputValues={inputValues}
+            selectedInputUnits={selectedInputUnits}
+            onInputChange={handleInputChange}
+            onUnitChange={handleUnitChange}
+            onCalculate={handleCalculate}
+          />
 
-        <CalculationResult
-          result={result}
-          selectedResultUnits={selectedResultUnits}
-          onResultUnitChange={handleResultUnitChange}
-          getConvertedResultValue={getConvertedResultValue}
-          resultUnitOptions={RESULT_UNIT_OPTIONS}
-        />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <CalculationResult
+            result={result}
+            selectedResultUnits={selectedResultUnits}
+            onResultUnitChange={handleResultUnitChange}
+            getConvertedResultValue={getConvertedResultValue}
+            resultUnitOptions={RESULT_UNIT_OPTIONS}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Footer */}
+      <View style={[styles.footerContainer, { height: footerHeight }]}>
+        {/* Aqui você pode colocar sua logo. Por enquanto, um texto placeholder: */}
+        <Text style={styles.footerLogoText}>Sua Logo Aqui</Text>
+        {/* Se tiver uma imagem: <Image source={require('@/assets/your-logo.png')} style={styles.footerLogo} /> */}
+      </View>
+    </View>
   );
 };
 

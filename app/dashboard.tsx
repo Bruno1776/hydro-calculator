@@ -29,15 +29,25 @@ export default function DashboardScreen() {
 
   const handleCalculationSelect = (calculation: CalculationType) => {
     router.push({
-      pathname: `/calculation/${calculation.id}`,
-      params: { ...calculation } // Passando todos os dados do cálculo
+      pathname: `/calculation/${calculation.id}`, // Manter o ID no path
+      params: { 
+        title: calculation.title, // Passar apenas as props necessárias explicitamente
+        description: calculation.description,
+        icon: calculation.icon,
+        category: calculation.category,
+      } 
     });
   };
 
   const handleLearningSelect = (calculation: CalculationType) => {
     router.push({
-      pathname: `/learning/${calculation.id}`,
-      params: { ...calculation } // Passando todos os dados do cálculo
+      pathname: `/learning/${calculation.id}`, // Manter o ID no path
+      params: { 
+        title: calculation.title, // Passar apenas as props necessárias explicitamente
+        description: calculation.description,
+        icon: calculation.icon,
+        category: calculation.category,
+      } 
     });
   };
 

@@ -4,7 +4,7 @@ import { CalculationType } from '@/types/calculation';
 import { CheckCircle } from 'lucide-react-native';
 // Removido ArrowLeft e CheckSquare, pois a navegação de voltar é pelo header do router
 // e o toggle de modo será feito pelo headerRight na tela.
-import MathJax from 'react-native-mathjax'; // Adicionado para LaTeX
+import MathJax from 'react-native-mathjax'; // Adicionado para <LaTeX></LaTeX>
 
 interface LearningViewProps {
   calculation: CalculationType;

@@ -56,7 +56,7 @@ const CalculationResult: React.FC<CalculationResultProps> = ({
                     itemStyle={styles.pickerItem}
                   >
                     {unitOptions.map(opt => (
-                      <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                      <Picker.Item key={opt.value} label={opt.label} value={opt.value}/>
                     ))}
                   </Picker>
                 </View>

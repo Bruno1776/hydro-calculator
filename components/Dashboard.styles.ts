@@ -1,9 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { AppColors } from '@/constants/colors'; // Importando de constants
 
-// Os estilos de Card e HistorySection foram movidos para seus respectivos componentes.
-// Os estilos de AppColors foram removidos daqui pois já estão em constants/colors.ts
-
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

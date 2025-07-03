@@ -35,7 +35,7 @@ export const calculationResultStyles = StyleSheet.create({
   },
   resultValueContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center', // Garante que os itens na linha estejam centralizados verticalmente
     justifyContent: 'space-between',
   },
   resultPickerContainer: {
@@ -45,16 +45,16 @@ export const calculationResultStyles = StyleSheet.create({
     borderColor: AppColors.inputBorder,
     borderRadius: 6,
     backgroundColor: AppColors.inputBackground,
-    height: Platform.OS === 'ios' ? undefined : 40,
-    justifyContent: 'center',
+    height: 40, // Definir uma altura fixa e consistente para ambas as plataformas
+    justifyContent: 'center', // Centraliza o Picker verticalmente dentro do container
   },
   picker: {
-    height: Platform.OS === 'ios' ? undefined : 40,
-    width: Platform.OS === 'ios' ? undefined : '100%',
+    height: 100, // Definir uma altura fixa e consistente para o Picker em ambas as plataformas
+    width: '100%', // Usar largura total do container
     color: AppColors.text,
   },
   pickerItem: { // Apenas iOS
     fontSize: 16,
-    color: AppColors.text, // Cor do texto dos itens do Picker no iOS
+    color: AppColors.text,
   },
 });
