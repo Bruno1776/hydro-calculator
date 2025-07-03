@@ -354,43 +354,36 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
         return [key, isNaN(val) ? 0 : val]; // Default to 0 if parsing fails
       })
     );
-    const allFieldsFilled = fields.every(field => {
-        // Coeficientes e porcentagens podem ser 0, então apenas verificamos se não estão vazios
-        // ou se o valor numérico é válido (não NaN após parseFloat).
-        const valueStr = inputValues[field.name]?.trim();
-        if (field.type === 'coefficient' || field.type === 'percentage') {
-            return valueStr !== '' && !isNaN(parseFloat(valueStr));
-        }
-        return valueStr !== '' && parseFloat(valueStr) > 0; // Para outros numéricos, assumimos > 0
-    });
 
     // Ajuste da validação para permitir zero em campos que não são estritamente positivos (ex: coeficientes)
     const allRequiredFieldsValid = fields.every(field => {
         const valueStr = inputValues[field.name]?.trim();
-        if (!valueStr && (field.type === 'numeric' || field.type === 'percentage' || field.type === 'coefficient')) {
-             // Considera 0 como um valor válido para campos não estritamente positivos
-            if (parseFloat(valueStr) === 0) return true;
-            return false; // Vazio não é permitido
+        if (!valueStr) { // If valueStr is empty or undefined
+             // If the field is numeric, percentage or coefficient, and the parsed value is 0, it's valid.
+             // Otherwise, an empty string is not valid.
+             const numVal = parseFloat(valueStr || ''); // Parse empty string as NaN
+             if (field.type === 'coefficient') { // Only coefficient can be 0 or positive
+                return !isNaN(numVal) && numVal >= 0;
+             }
+             // For numeric and percentage fields, it must be > 0
+             if (field.type === 'numeric' || field.type === 'percentage') {
+                return !isNaN(numVal) && numVal > 0;
+             }
+             return false; // For other types, empty is not valid
         }
-        if (valueStr === '') return false; // Vazio não é permitido
-
         const numValue = parseFloat(valueStr);
-        if (isNaN(numValue)) return false; // Não é um número
+        if (isNaN(numValue)) return false; // Not a number
 
-        // Para campos que não podem ser zero (ex: diâmetro, vazão em alguns contextos)
-        // Esta lógica pode precisar ser mais granular baseada no campo específico.
-        // Por agora, permitimos zero, a lógica de cálculo deve tratar divisões por zero.
-        // if (field.type === 'numeric' && numValue <= 0 && field.name !== 'lossCoefficient') {
-        //   // Exceção para lossCoefficient que pode ser 0.
-        //   // Adicionar outras exceções ou refinar esta lógica.
-        //   return false;
-        // }
+        // For fields that cannot be zero or negative
+        if (field.type === 'numeric' && numValue <= 0 && field.name !== 'lossCoefficient') {
+           return false;
+        }
         return true;
     });
 
 
     if (!allRequiredFieldsValid) {
-        Alert.alert('Entrada Inválida', 'Por favor, preencha todos os campos com valores numéricos válidos. Alguns campos não podem ser zero.');
+        Alert.alert('Entrada Inválida', 'Por favor, preencha todos os campos com valores numéricos válidos. Alguns campos não podem ser zero ou negativos.');
         return;
     }
 
@@ -414,11 +407,13 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
 
   // Função para lidar com a mudança de unidade
   const handleUnitChange = (fieldName: string, unitValue: string) => {
+    console.log(`Unidade de entrada para ${fieldName} alterada para: ${unitValue}`); // Log de depuração
     setSelectedInputUnits(prev => ({ ...prev, [fieldName]: unitValue }));
     setResult(null); // Limpa o resultado anterior, pois a unidade de entrada mudou
   };
 
   const handleResultUnitChange = (resultKey: string, unitValue: string) => {
+    console.log(`Unidade de resultado para ${resultKey} alterada para: ${unitValue}`); // Log de depuração
     setSelectedResultUnits(prev => ({ ...prev, [resultKey]: unitValue }));
   };
 
@@ -487,7 +482,7 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
                 placeholder={field.placeholder || `Valor para ${field.label.toLowerCase()}`}
                 placeholderTextColor={AppColors.textSecondary}
               />
-              {field.unitOptions && field.unitOptions.length > 0 && (
+              {field.unitOptions && field.unitOptions.length > 0 ? (
                 <View style={styles.pickerContainer}>
                   {/* Usando um Picker simples para demonstração. Em um app real, react-native-picker-select seria melhor. */}
                   {/* Este Picker básico pode não funcionar bem em todas as plataformas ou pode precisar de mais estilo. */}
@@ -495,15 +490,14 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
                     selectedValue={selectedInputUnits[field.name] || field.defaultInputUnit}
                     style={styles.picker}
                     onValueChange={(itemValue) => handleUnitChange(field.name, itemValue)}
-                    itemStyle={styles.pickerItem} // Estilo para itens do Picker no iOS
+                    itemStyle={Platform.OS === 'ios' ? styles.pickerItem : undefined} // Aplicar itemStyle condicionalmente para iOS
                   >
                     {field.unitOptions.map(opt => (
                       <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
                     ))}
                   </Picker>
                 </View>
-              )}
-              {!field.unitOptions && field.baseUnit && ( // Exibe a unidade base se não houver opções
+              ) : ( // Exibe a unidade base se não houver opções
                  <Text style={styles.unitStaticDisplay}>{selectedInputUnits[field.name] || field.baseUnit}</Text>
               )}
             </View>
@@ -533,6 +527,7 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
 
             return (
               <View key={key} style={styles.resultItem}>
+                {/* O label do resultado sempre acima do valor e do picker */}
                 <Text style={styles.resultKey}>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
                 <View style={styles.resultValueContainer}>
                   <Text style={styles.resultValue}>
@@ -544,7 +539,7 @@ const CalculationViewComponent: React.FC<CalculationViewProps> = ({
                         selectedValue={selectedResultUnits[key] || unitOptions[0].value}
                         style={styles.picker} // Reutilizando estilo do picker de input
                         onValueChange={(itemValue) => handleResultUnitChange(key, itemValue)}
-                        itemStyle={styles.pickerItem}
+                        itemStyle={Platform.OS === 'ios' ? styles.pickerItem : undefined} // Aplicar itemStyle condicionalmente
                       >
                         {unitOptions.map(opt => (
                           <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
@@ -606,11 +601,6 @@ const styles = StyleSheet.create({
     color: AppColors.text,
     fontWeight: '500',
   },
-  unitText: { // Este estilo não está mais sendo usado diretamente, o Picker tem o seu.
-    fontSize: 13,
-    color: AppColors.textSecondary,
-    fontWeight: 'normal',
-  },
   inputRow: { // Novo estilo para agrupar TextInput e Picker
     flexDirection: 'row',
     alignItems: 'center',
@@ -632,7 +622,7 @@ const styles = StyleSheet.create({
     borderColor: AppColors.inputBorder,
     borderRadius: 8,
     backgroundColor: AppColors.inputBackground,
-    minWidth: 100, // Largura mínima para o picker
+    minWidth: 140, // Aumentado para garantir que o texto não seja cortado
     height: Platform.OS === 'ios' ? undefined : 50, // Altura para Android para alinhar com TextInput
     justifyContent: 'center', // Para Android
   },
@@ -650,121 +640,6 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     paddingHorizontal: 10,
     alignSelf: 'center',
-  },
-  calculateButton: {
-    backgroundColor: AppColors.primary,
-    paddingVertical: 14,
-      type: calculation.title,
-      timestamp: new Date().toISOString(),
-      inputs: numericInputs,
-      result: calcResult,
-    });
-  };
-
-  return (
-    <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-    >
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-      {/* O Header com título e botões de ação (voltar, alternar modo) foi movido para a tela (app/calculation/[id].tsx) */}
-      <Text style={styles.description}>{calculation.description}</Text>
-
-      <View style={styles.form}>
-        {fields.map((field) => (
-          <View key={field.name} style={styles.inputGroup}>
-            <Text style={styles.label}>{field.label} <Text style={styles.unitText}>({field.unit || '-'})</Text>:</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={inputValues[field.name]}
-              onChangeText={(text) => handleInputChange(field.name, text)}
-              placeholder={field.placeholder || `Valor para ${field.label.toLowerCase()}`}
-              placeholderTextColor={AppColors.textSecondary}
-            />
-          </View>
-        ))}
-        <TouchableOpacity style={styles.calculateButton} onPress={handleCalculate}>
-            <CheckSquare size={20} color={AppColors.buttonText} />
-            <Text style={styles.calculateButtonText}>Calcular</Text>
-        </TouchableOpacity>
-      </View>
-
-      {result && (
-        <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>Resultado:</Text>
-          {Object.entries(result).map(([key, value]) => (
-             <View key={key} style={styles.resultItem}>
-                <Text style={styles.resultKey}>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
-                <Text style={styles.resultValue}>
-                    {typeof value === 'number' ? value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4}) : value.toString()}
-                </Text>
-             </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
-    </KeyboardAvoidingView>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: AppColors.background,
-  },
-  scrollContentContainer: {
-    padding: 16,
-    paddingBottom: 30,
-  },
-  // Header styles foram removidos daqui pois o header é gerenciado pelo Stack Navigator na tela
-  description: {
-    fontSize: 15,
-    color: AppColors.textSecondary,
-    marginBottom: 24,
-    textAlign: 'center',
-    paddingHorizontal: 10,
-  },
-  form: {
-    backgroundColor: AppColors.cardBackground,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 6,
-    color: AppColors.text,
-    fontWeight: '500',
-  },
-  unitText: {
-    fontSize: 13,
-    color: AppColors.textSecondary,
-    fontWeight: 'normal',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: AppColors.inputBorder,
-    backgroundColor: AppColors.inputBackground,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 10,
-    fontSize: 16,
-    color: AppColors.text,
   },
   calculateButton: {
     backgroundColor: AppColors.primary,
@@ -796,31 +671,32 @@ const styles = StyleSheet.create({
     color: AppColors.resultText,
   },
   resultItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
+    flexDirection: 'column', // Alterado para empilhar label e valor
+    marginBottom: 12, // Espaçamento maior entre os itens de resultado
     paddingVertical: 4,
   },
   resultKey: {
     fontSize: 16,
     color: AppColors.resultText,
     fontWeight: '500',
+    marginBottom: 4, // Espaçamento entre o label e o valor
   },
   resultValue: {
     fontSize: 16,
     color: AppColors.resultText,
     fontWeight: 'bold',
-    textAlign: 'right',
+    // Não mais `textAlign: 'right'` aqui, pois o contêiner gerencia o alinhamento
     flexShrink: 1,
   },
   resultValueContainer: { // Para agrupar valor e picker de resultado
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end', // Alinha o valor e o picker à direita
     flexShrink: 1, // Garante que não empurre o resultKey para fora
   },
   resultPickerContainer: { // Container para o Picker de unidade de resultado
     marginLeft: 8,
-    minWidth: 90, // Largura mínima para o picker de resultado
+    minWidth: 120, // **Aumentado para garantir que o texto não seja cortado**
     borderWidth: 1,
     borderColor: AppColors.inputBorder, // Reutilizando cor da borda do input
     borderRadius: 6,
@@ -829,4 +705,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CalculationViewComponent; // Renomeado para evitar conflito com nome de diretório/tela
+export default CalculationViewComponent;

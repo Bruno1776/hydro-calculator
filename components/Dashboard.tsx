@@ -36,7 +36,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   // completedLearningModules, // Removido
 }) => {
   const renderCalculationItem = ({ item }: { item: CalculationType }) => (
-    <TouchableOpacity style={styles.card} onPress={() => onCalculationSelect(item)}>
+    <TouchableOpacity key={item.id} style={styles.card} onPress={() => onCalculationSelect(item)}>
       <View style={styles.cardContent}>
         <Text style={styles.cardIcon}>{item.icon}</Text>
         <View style={styles.cardTextContainer}>

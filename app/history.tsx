@@ -22,25 +22,35 @@ export default function HistoryScreen() {
   const [calculationHistory, setCalculationHistory] = useState<CalculationHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadHistory = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const savedHistory = await AsyncStorage.getItem(HISTORY_KEY);
-      if (savedHistory) {
-        setCalculationHistory(JSON.parse(savedHistory));
-      } else {
-        setCalculationHistory([]);
-      }
-    } catch (e) {
-      console.error("Failed to load calculation history:", e);
-      Alert.alert("Erro", "Não foi possível carregar o histórico.");
-      setCalculationHistory([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Alterado para envolver a lógica assíncrona em uma função síncrona dentro de useCallback
+  useFocusEffect(
+    useCallback(() => {
+      const fetchHistory = async () => {
+        setIsLoading(true);
+        try {
+          const savedHistory = await AsyncStorage.getItem(HISTORY_KEY);
+          if (savedHistory) {
+            setCalculationHistory(JSON.parse(savedHistory));
+          } else {
+            setCalculationHistory([]);
+          }
+        } catch (e) {
+          console.error("Failed to load calculation history:", e);
+          Alert.alert("Erro", "Não foi possível carregar o histórico.");
+          setCalculationHistory([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-  useFocusEffect(loadHistory);
+      fetchHistory(); // Chama a função assíncrona imediatamente
+
+      // Retorna uma função de limpeza opcional, se houver
+      return () => {
+        // Qualquer lógica de limpeza, se necessário
+      };
+    }, []) // Array de dependências vazio pois `fetchHistory` não depende de props/state externos que mudem
+  );
 
   const clearHistory = async () => {
     Alert.alert(
