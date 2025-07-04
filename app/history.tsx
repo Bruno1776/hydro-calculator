@@ -5,12 +5,7 @@ import { CalculationHistory } from '@/types/calculation';
 import { Trash2 } from 'lucide-react-native';
 import HistoryView from '@/components/HistoryView';
 import { loadHistory, clearHistoryStorage } from '@/services/asyncStorage'; // Funções de AsyncStorage atualizadas
-
-// Cores para o botão de limpar, podem ser movidas para um arquivo de tema
-const AccentColors = {
-  accentRed: '#FF3B30',
-  // headerButtonColor: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF', // Não mais necessário aqui
-};
+import { AppColors } from '@/constants/colors';
 
 export default function HistoryScreen() {
   const [calculationHistory, setCalculationHistory] = useState<CalculationHistory[]>([]);
@@ -67,8 +62,8 @@ export default function HistoryScreen() {
           title: 'Histórico de Cálculos',
           headerRight: () => (
             calculationHistory.length > 0 ? (
-              <TouchableOpacity onPress={handleClearHistory} style={{ marginRight: Platform.OS === 'ios' ? 10 : 15, padding: 5 }}>
-                <Trash2 color={AccentColors.accentRed} size={24} />
+              <TouchableOpacity onPress={handleClearHistory}>
+                <Trash2 color={AppColors.white} size={24} />
               </TouchableOpacity>
             ) : null
           ),

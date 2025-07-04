@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 export const AppColors = {
-  primary: '#007AFF', // Azul primário
+  primary: '#007B8F', // Azul primário
   secondary: '#5856D6', // Roxo secundário
   background: '#F2F2F7', // Cinza claro (iOS system background)
   cardBackground: '#FFFFFF', // Branco para cards
@@ -19,8 +19,11 @@ export const AppColors = {
   lightGrey: '#EFEFEF', // Cinza muito claro
   borderColor: '#C7C7CC', // Cor de borda genérica (igual a inputBorder)
 
+
   // Cores específicas de plataforma (exemplo)
   headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
+  headerBackground: '#FF0000',
+  headerTintColor:'#FF0000',
   learnButtonBackground: Platform.OS === 'android' ? '#FFF3E0' : 'transparent', // Usado em CalculationScreen
 };
 

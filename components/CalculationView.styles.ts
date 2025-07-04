@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import { AppColors } from '@/constants/colors'; // Importando de constants
 
 export const styles = StyleSheet.create({
+  headerImage:{
+    height:72,
+    width:120
+  },
   fullScreenContainer: { // Novo container que ocupa a tela inteira
     flex: 1,
     backgroundColor: AppColors.background,
@@ -31,6 +35,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: AppColors.borderColor,
     paddingVertical: 10, // Adicione um padding vertical para espaçamento interno
+    paddingBottom:40
   },
   footerLogoText: { // Estilo para o texto placeholder da logo
     fontSize: 18,

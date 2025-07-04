@@ -2,6 +2,9 @@ import { StyleSheet } from 'react-native';
 import { AppColors } from '@/constants/colors'; // Importando de constants
 
 export const styles = StyleSheet.create({
+  headerImage:{
+    
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

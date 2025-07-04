@@ -9,8 +9,8 @@ import { BookOpen } from 'lucide-react-native';
 // Cores podem ser movidas para um arquivo de tema global
 const AppColors = {
   primary: '#007AFF',
-  headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
-  learnButtonBackground: Platform.OS === 'android' ? '#FFF3E0' : 'transparent', // Condicional para Android
+  headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFF',
+  learnButtonBackground: Platform.OS === 'android' ? '#007B8F' : 'transparent', // Condicional para Android
   // learnButtonText: '#FF9500', // Não usado diretamente aqui
 };
 
@@ -28,7 +28,6 @@ export default function CalculationScreen() {
       if (foundCalc) {
         setSelectedCalculation(foundCalc);
       } else if (title && description && icon && category) {
-        // Se não encontrar nos dados estáticos, mas todos os params estiverem presentes, monta o objeto
         setSelectedCalculation({ id, title, description, icon, category });
       } else {
         Alert.alert(
@@ -99,9 +98,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0', // Um cinza claro para o fundo do loading
   },
   headerButton: {
-    marginRight: Platform.OS === 'ios' ? 10 : 15,
     padding: 5,
-    backgroundColor: AppColors.learnButtonBackground,
     borderRadius: Platform.OS === 'android' ? 20 : 0, // Borda arredondada apenas no Android
   },
 });

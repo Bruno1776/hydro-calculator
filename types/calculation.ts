@@ -2,7 +2,7 @@ export type CalculationType = {
   id: string;
   title: string;
   description: string;
-  icon: string; // Manter como string, emojis funcionam bem em Text no RN
+  icon: string;
   category: string;
 };
 

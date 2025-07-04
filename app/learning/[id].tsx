@@ -13,8 +13,8 @@ const AppColors = { // Consistência de cores
   headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
   // calcButtonBackground: '#EBF5FF', // Antigo
   // calcButtonText: '#007AFF', // Antigo
-  headerButtonIconColor: '#28a745', // Verde para o ícone (Bootstrap success green)
-  headerButtonBackground: Platform.OS === 'android' ? '#E9F5EC' : 'transparent', // Fundo verde claro para Android
+  headerButtonIconColor: '#FFF', // Verde para o ícone (Bootstrap success green)
+  headerButtonBackground: Platform.OS === 'android' ? '#007B8F' : 'transparent', // Fundo verde claro para Android
 };
 
 export default function LearningScreen() {
@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   headerButton: {
-    marginRight: Platform.OS === 'ios' ? 10 : 15,
     padding: 5,
     // backgroundColor removido daqui, pois será aplicado inline via AppColors.headerButtonBackground
     borderRadius: Platform.OS === 'android' ? 20 : 0,

@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { LayoutDashboard } from 'lucide-react-native';
-import { styles } from '../../Dashboard.styles'; // Os estilos do header estão em Dashboard.styles
-import { AppColors } from '@/constants/colors'; // Importando de constants
+import { View, Text, Image } from 'react-native'; // Importar Image
+// import { LayoutDashboard } from 'lucide-react-native'; // Remover esta importação
+import { styles } from '../../Dashboard.styles';
+import { AppColors } from '@/constants/colors';
 
 interface DashboardHeaderProps {
   title: string;
@@ -11,7 +11,11 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
   return (
     <View style={styles.headerContainer}>
-      <LayoutDashboard color={AppColors.primary} size={28} />
+      {/* Substituindo o ícone pela imagem */}
+      <Image
+        source={require('../../../assets/LogosGrupoNovaes_6.png')} // Ajuste o caminho conforme sua estrutura de pastas
+        style={styles.headerImage} // Adicione este estilo para controlar tamanho e outros
+      />
       <Text style={styles.headerTitle}>{title}</Text>
     </View>
   );

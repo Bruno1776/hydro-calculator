@@ -2,6 +2,11 @@ import { StyleSheet } from 'react-native';
 import { AppColors } from '@/constants/colors'; // Importando de constants
 
 export const styles = StyleSheet.create({
+
+  headerImage:{
+    width:60,
+    height:60,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: AppColors.cardBackground, // Usando cor global

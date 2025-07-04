@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, ActivityIndicator, Dimensions, Image} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Droplet } from 'lucide-react-native';
 import { styles } from './SplashScreen.styles'; // AppColors não é mais exportado daqui
@@ -7,7 +7,7 @@ import { AppColors } from '@/constants/colors'; // Importando de constants
 
 const SplashScreenComponent = () => {
   const router = useRouter();
-
+/*
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace('/dashboard');
@@ -15,15 +15,16 @@ const SplashScreenComponent = () => {
 
     return () => clearTimeout(timer);
   }, [router]);
+  */
 
   return (
     <View style={styles.container}>
-      <Droplet
-        size={Dimensions.get('window').width * 0.2}
-        color={AppColors.white}
-        style={styles.icon}
+      <Image
+        source={require('../assets/LogosGrupoNovaes_10.png')} // Ajuste o caminho conforme sua estrutura de pastas
+        style={styles.headerImage} // Adicione este estilo para controlar tamanho e outros
       />
       <Text style={styles.title}>Hydro Calculator</Text>
+      
       <ActivityIndicator
         size="large"
         color={AppColors.white}

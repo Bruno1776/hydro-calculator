@@ -1,18 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StatusBar } from 'react-native'; // Importe StatusBar
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SplashScreen as ExpoSplashScreen, Stack } from 'expo-router';
+import { AppColors } from '@/constants/colors';
 
-// Ocultar o splash screen nativo do sistema assim que o JavaScript carregar
 ExpoSplashScreen.preventAutoHideAsync();
-
-const AppColors = {
-  primary: '#007AFF',
-  background: Platform.OS === 'ios' ? '#F2F2F7' : '#FFFFFF', // iOS usa um cinza mais claro para fundo de tela
-  headerBackground: Platform.OS === 'ios' ? '#F9F9F9' : '#007AFF', // iOS tem header quase branco, Android pode usar cor primária
-  headerText: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
-  headerTintColor: Platform.OS === 'ios' ? '#007AFF' : '#FFFFFF',
-};
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -20,8 +12,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        // Aqui podem entrar tarefas como carregamento de fontes, etc.
-        // await Font.loadAsync({ ... });
+        // ... (seu código de preparação do app)
       } catch (e) {
         console.warn("Erro na preparação do RootLayout:", e);
       } finally {
@@ -43,17 +34,21 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider onLayout={onLayoutRootView}>
+      {/* Opção 1: Desabilitar completamente a barra de status */}
+      <StatusBar hidden={true} />
+      {/* --- */}
+
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: AppColors.headerBackground,
+            backgroundColor: AppColors.primary,
           },
-          headerTintColor: AppColors.headerTintColor,
+          headerTintColor: AppColors.white,
           headerTitleStyle: {
             fontWeight: 'bold',
             color: AppColors.headerText,
           },
-          headerBackTitleVisible: false,
+          headerBackVisible: false
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -61,29 +56,25 @@ export default function RootLayout() {
           name="dashboard"
           options={{
             title: 'Hydro Calculator',
-            headerShown: false, // O Dashboard já tem um header customizado
+            headerShown: false,
           }}
         />
         <Stack.Screen
           name="calculation/[id]"
           options={{
-            // O título será definido dinamicamente na própria tela
-            // e o botão de voltar é adicionado automaticamente.
             headerShown: true,
           }}
         />
         <Stack.Screen
           name="learning/[id]"
           options={{
-            // O título será definido dinamicamente na própria tela
-            // e o botão de voltar é adicionado automaticamente.
             headerShown: true,
           }}
         />
         <Stack.Screen
-          name="history" // Nome do arquivo app/history.tsx
+          name="history"
           options={{
-            title: 'Histórico de Cálculos', // Título padrão, pode ser sobrescrito na tela
+            title: 'Histórico de Cálculos',
             headerShown: true,
           }}
         />
